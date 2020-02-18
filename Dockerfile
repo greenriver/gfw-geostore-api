@@ -1,4 +1,4 @@
-FROM mhart/alpine-node:12.9
+FROM node:12-alpine
 MAINTAINER info@vizzuality.com
 
 ENV NAME gfw-geostore-api
