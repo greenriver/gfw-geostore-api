@@ -7,7 +7,7 @@ const GeoStore = require('models/geoStore');
 const { createGeostore } = require('../utils/utils');
 const { getTestServer } = require('../utils/test-server');
 
-const should = chai.should();
+chai.should();
 
 let requester;
 nock.disableNetConnect();

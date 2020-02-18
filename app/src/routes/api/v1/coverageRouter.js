@@ -1,15 +1,8 @@
-
 const Router = require('koa-router');
 const logger = require('logger');
 const CoverageSerializer = require('serializers/coverageSerializer');
-const CoverageValidator = require('validators/coverageValidator');
-const GeoStore = require('models/geoStore');
-const IdConnection = require('models/idConnection');
 const CoverageService = require('services/coverageService');
 const GeoStoreService = require('services/geoStoreService');
-const CoverageDuplicated = require('errors/coverageDuplicated');
-const CoverageNotFound = require('errors/coverageNotFound');
-const GeoJSONNotFound = require('errors/geoJSONNotFound');
 
 const router = new Router({
     prefix: '/coverage'

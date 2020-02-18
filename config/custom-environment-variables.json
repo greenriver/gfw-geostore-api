@@ -11,9 +11,6 @@
   "service": {
     "port": "PORT"
   },
-  "migrate": {
-    "uri": "MIGRATE_URI"
-  },
   "cartoDB": {
     "user": "CARTODB_USER"
   }

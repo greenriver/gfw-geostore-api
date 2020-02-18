@@ -2,7 +2,6 @@ const logger = require('logger');
 const config = require('config');
 const CartoDB = require('cartodb');
 const Mustache = require('mustache');
-const JSONAPIDeserializer = require('jsonapi-serializer').Deserializer;
 const GeoStoreServiceV2 = require('services/geoStoreServiceV2');
 
 const ISO = `SELECT ST_AsGeoJSON(ST_MAKEVALID({geom})) AS geojson, area_ha, name_0 as name
@@ -48,26 +47,19 @@ const SIMPLIFIED_USE = `SELECT ST_Area(geography(the_geom))/10000 as area_ha, th
         FROM {{use}}
         WHERE cartodb_id = {{id}}`;
 
-const executeThunk = function (client, sql, params, thresh) {
-    return function (callback) {
-        sql = sql.replace('{geom}', thresh ? `ST_Simplify(the_geom, ${thresh})` : 'the_geom')
-            .replace('{geom}', thresh ? `ST_Simplify(the_geom, ${thresh})` : 'the_geom');
-        logger.debug(Mustache.render(sql, params, thresh));
-        client.execute(sql, params).done((data) => {
-            callback(null, data);
-        }).error((err) => {
-            callback(err, null);
-        });
-    };
+const executeThunk = (client, sql, params, thresh) => (callback) => {
+    // eslint-disable-next-line no-param-reassign
+    sql = sql.replace('{geom}', thresh ? `ST_Simplify(the_geom, ${thresh})` : 'the_geom')
+        .replace('{geom}', thresh ? `ST_Simplify(the_geom, ${thresh})` : 'the_geom');
+    logger.debug(Mustache.render(sql, params, thresh));
+    client.execute(sql, params).done((data) => {
+        callback(null, data);
+    }).error((err) => {
+        callback(err, null);
+    });
 };
 
-const deserializer = function (obj) {
-    return function (callback) {
-        new JSONAPIDeserializer({ keyForAttribute: 'camelCase' }).deserialize(obj, callback);
-    };
-};
-
-const parseSimplifyGeom = function (iso, id1, id2) {
+const parseSimplifyGeom = (iso, id1, id2) => {
     const bigCountries = ['USA', 'RUS', 'CAN', 'CHN', 'BRA', 'IDN'];
     const baseThresh = bigCountries.includes(iso) ? 0.1 : 0.005;
     if (iso && !id1 && !id2) {
@@ -93,6 +85,7 @@ class CartoDBServiceV2 {
         };
 
         if (!thresh) {
+            // eslint-disable-next-line no-param-reassign
             thresh = parseSimplifyGeom(iso);
         }
 
@@ -132,13 +125,13 @@ class CartoDBServiceV2 {
     * getNationalList() {
         logger.debug('Request national list names from carto');
         const countryList = yield GeoStoreServiceV2.getNationalList();
-        const iso_values_map = countryList.map((el) => el.info.iso);
-        let iso_values = '';
-        iso_values_map.forEach((el) => {
-            iso_values += `'${el.toUpperCase()}', `;
+        const isoValuesMap = countryList.map((el) => el.info.iso);
+        let isoValues = '';
+        isoValuesMap.forEach((el) => {
+            isoValues += `'${el.toUpperCase()}', `;
         });
-        iso_values = `(${iso_values.substr(0, iso_values.length - 2)})`;
-        const data = yield executeThunk(this.client, ISO_NAME + iso_values);
+        isoValues = `(${isoValues.substr(0, isoValues.length - 2)})`;
+        const data = yield executeThunk(this.client, ISO_NAME + isoValues);
         if (data.rows && data.rows.length > 0) {
             logger.debug('Adding Country names');
             countryList.forEach((countryListElement) => {
@@ -160,6 +153,7 @@ class CartoDBServiceV2 {
         };
 
         if (!thresh) {
+            // eslint-disable-next-line no-param-reassign
             thresh = parseSimplifyGeom(iso, id1);
         }
         const query = {
@@ -205,6 +199,7 @@ class CartoDBServiceV2 {
         };
 
         if (!thresh) {
+            // eslint-disable-next-line no-param-reassign
             thresh = parseSimplifyGeom(iso, id1, id2);
         }
         const query = {
@@ -307,25 +302,6 @@ class CartoDBServiceV2 {
             existingGeo = yield GeoStoreServiceV2.saveGeostore(JSON.parse(result.geojson), geoData);
             logger.debug('Return wdpa geojson from carto');
             return existingGeo;
-        }
-        return null;
-    }
-
-    * getGeostore(hashGeoStore) {
-        logger.debug('Obtaining geostore with hash %s', hashGeoStore);
-        const result = yield require('vizz.microservice-client').requestToMicroservice({
-            uri: `/geostore/${hashGeoStore}`,
-            method: 'GET',
-            json: true
-        });
-        if (result.statusCode !== 200) {
-            console.error('Error obtaining geostore:');
-            console.error(result);
-            return null;
-        }
-        const geostore = yield deserializer(result.body);
-        if (geostore) {
-            return geostore;
         }
         return null;
     }

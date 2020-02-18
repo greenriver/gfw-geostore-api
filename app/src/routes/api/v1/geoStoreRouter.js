@@ -49,7 +49,7 @@ class GeoStoreRouter {
             this.throw(404, 'No GeoStores in payload');
             return;
         }
-        const ids = [...new Set(geostores.map(el => el.trim()))];
+        const ids = [...new Set(geostores.map((el) => el.trim()))];
 
         logger.debug('Getting geostore by hash %s', ids);
 
@@ -59,7 +59,8 @@ class GeoStoreRouter {
             return;
         }
         const foundGeoStores = geoStores.length;
-        logger.debug(`Found ${foundGeoStores} matching geostores. Returning ${config.get('constants.maxGeostoresFoundById') > foundGeoStores ? foundGeoStores : config.get('constants.maxGeostoresFoundById')}.`);
+        const geostoresFoundById = config.get('constants.maxGeostoresFoundById') > foundGeoStores ? foundGeoStores : config.get('constants.maxGeostoresFoundById');
+        logger.debug(`Found ${foundGeoStores} matching geostores. Returning ${geostoresFoundById}.`);
         const slicedGeoStores = geoStores.slice(0, config.get('constants.maxGeostoresFoundById'));
         const parsedData = {
             geostores: slicedGeoStores,

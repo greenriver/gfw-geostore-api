@@ -16,6 +16,7 @@ class GeoJsonIOService {
         // and ditch the rest-- only need type and coordinates properties
         if (geojson.features[0].geometry.type === 'MultiPolygon') {
             logger.debug('found multipolygon');
+            // eslint-disable-next-line no-param-reassign
             geojson = {
                 type: 'MultiPolygon',
                 coordinates: geojson.features[0].geometry.coordinates
@@ -29,7 +30,7 @@ class GeoJsonIOService {
         }
 
         if (JSON.stringify(geojson).length <= MAX_URL_LEN) {
-            return `http://geojson.io/` + `#data=data:application/json,${encodeURIComponent(
+            return `http://geojson.io/#data=data:application/json,${encodeURIComponent(
                 JSON.stringify(geojson)
             )}`;
 

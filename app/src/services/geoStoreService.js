@@ -9,19 +9,16 @@ const ProviderNotFound = require('errors/providerNotFound');
 const GeoJSONNotFound = require('errors/geoJSONNotFound');
 const UnknownGeometry = require('errors/unknownGeometry');
 const config = require('config');
-const { promisify } = require('util');
 
 const CARTO_PROVIDER = 'carto';
 
 
-const executeThunk = function (client, sql, params) {
-    return function (callback) {
-        client.execute(sql, params).done((data) => {
-            callback(null, data);
-        }).error((err) => {
-            callback(err[0], null);
-        });
-    };
+const executeThunk = (client, sql, params) => (callback) => {
+    client.execute(sql, params).done((data) => {
+        callback(null, data);
+    }).error((err) => {
+        callback(err[0], null);
+    });
 };
 
 class GeoStoreService {
@@ -47,12 +44,12 @@ class GeoStoreService {
 
             logger.debug('GeoJSON: %s', JSON.stringify(geojson));
 
-            const geometry_type = GeoStoreService.getGeometryType(geojson);
-            logger.debug('Geometry type: %s', JSON.stringify(geometry_type));
+            const geometryType = GeoStoreService.getGeometryType(geojson);
+            logger.debug('Geometry type: %s', JSON.stringify(geometryType));
 
             logger.debug('Repair geoJSON geometry');
             logger.debug('Generating query');
-            const sql = `SELECT ST_AsGeoJson(ST_CollectionExtract(st_MakeValid(ST_GeomFromGeoJSON('${JSON.stringify(geojson)}')),${geometry_type})) as geojson`;
+            const sql = `SELECT ST_AsGeoJson(ST_CollectionExtract(st_MakeValid(ST_GeomFromGeoJSON('${JSON.stringify(geojson)}')),${geometryType})) as geojson`;
 
             if (process.env.NODE_ENV !== 'test' || sql.length < 2000) {
                 logger.debug('SQL to repair geojson: %s', sql);
@@ -189,12 +186,12 @@ class GeoStoreService {
             };
         }
 
-        let props = null;
-        const geom_type = geoStore.geojson.type || null;
-        if (geom_type && geom_type === 'FeatureCollection') {
+        let props;
+        const geomType = geoStore.geojson.type || null;
+        if (geomType && geomType === 'FeatureCollection') {
             logger.info('Preserving FeatureCollection properties.');
             props = geoStore.geojson.features[0].properties || null;
-        } else if (geom_type && geom_type === 'Feature') {
+        } else if (geomType && geomType === 'Feature') {
             logger.info('Preserving Feature properties.');
             props = geoStore.geojson.properties || null;
         } else {
@@ -223,7 +220,7 @@ class GeoStoreService {
         if (geoStore.areaHa === undefined) {
             geoStore.areaHa = turf.area(geoStore.geojson) / 10000; // convert to ha2
         }
-        const exist = yield GeoStore.findOne({
+        yield GeoStore.findOne({
             hash: geoStore.hash
         });
         if (!geoStore.bbox) {

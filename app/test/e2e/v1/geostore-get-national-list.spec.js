@@ -9,7 +9,7 @@ const { createGeostore } = require('../utils/utils');
 const { createMockQueryCartoDB } = require('../utils/mock');
 const { createQueryISOName } = require('../utils/queries-v1');
 
-const should = chai.should();
+chai.should();
 const prefix = '/api/v1/geostore/admin/list';
 
 let listNational;

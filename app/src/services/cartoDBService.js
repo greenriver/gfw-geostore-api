@@ -1,10 +1,7 @@
-
 const logger = require('logger');
-const path = require('path');
 const config = require('config');
 const CartoDB = require('cartodb');
 const Mustache = require('mustache');
-const JSONAPIDeserializer = require('jsonapi-serializer').Deserializer;
 const GeoStoreService = require('services/geoStoreService');
 
 const ISO = `SELECT ST_AsGeoJSON(st_makevalid(the_geom)) AS geojson, (ST_Area(geography(the_geom))/10000) as area_ha, name_0 as name
@@ -42,23 +39,14 @@ const USE = `SELECT ST_AsGeoJSON(st_makevalid(the_geom)) AS geojson, (ST_Area(ge
         FROM {{use}}
         WHERE cartodb_id = {{id}}`;
 
-const executeThunk = function (client, sql, params) {
-    return function (callback) {
-        logger.debug(Mustache.render(sql, params));
-        client.execute(sql, params).done((data) => {
-            callback(null, data);
-        }).error((err) => {
-            callback(err, null);
-        });
-    };
+const executeThunk = (client, sql, params) => (callback) => {
+    logger.debug(Mustache.render(sql, params));
+    client.execute(sql, params).done((data) => {
+        callback(null, data);
+    }).error((err) => {
+        callback(err, null);
+    });
 };
-
-const deserializer = function (obj) {
-    return function (callback) {
-        new JSONAPIDeserializer({ keyForAttribute: 'camelCase' }).deserialize(obj, callback);
-    };
-};
-
 
 class CartoDBService {
 
@@ -103,13 +91,13 @@ class CartoDBService {
     * getNationalList() {
         logger.debug('Request national list names from carto');
         const countryList = yield GeoStoreService.getNationalList();
-        const iso_values_map = countryList.map((el) => el.info.iso);
-        let iso_values = '';
-        iso_values_map.forEach((el) => {
-            iso_values += `'${el.toUpperCase()}', `;
+        const isoMapValues = countryList.map((el) => el.info.iso);
+        let isoValues = '';
+        isoMapValues.forEach((el) => {
+            isoValues += `'${el.toUpperCase()}', `;
         });
-        iso_values = `(${iso_values.substr(0, iso_values.length - 2)})`;
-        const data = yield executeThunk(this.client, ISO_NAME + iso_values);
+        isoValues = `(${isoValues.substr(0, isoValues.length - 2)})`;
+        const data = yield executeThunk(this.client, ISO_NAME + isoValues);
         if (data.rows && data.rows.length > 0) {
             logger.debug('Adding Country names');
             countryList.forEach((countryListElement) => {
@@ -249,25 +237,6 @@ class CartoDBService {
             existingGeo = yield GeoStoreService.saveGeostore(JSON.parse(result.geojson), geoData);
             logger.debug('Return wdpa geojson from carto');
             return existingGeo;
-        }
-        return null;
-    }
-
-    * getGeostore(hashGeoStore) {
-        logger.debug('Obtaining geostore with hash %s', hashGeoStore);
-        const result = yield require('vizz.microservice-client').requestToMicroservice({
-            uri: `/geostore/${hashGeoStore}`,
-            method: 'GET',
-            json: true
-        });
-        if (result.statusCode !== 200) {
-            console.error('Error obtaining geostore:');
-            console.error(result);
-            return null;
-        }
-        const geostore = yield deserializer(result.body);
-        if (geostore) {
-            return geostore;
         }
         return null;
     }

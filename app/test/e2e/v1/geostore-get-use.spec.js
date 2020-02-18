@@ -10,7 +10,7 @@ const { createMockQueryCartoDB } = require('../utils/mock');
 const { createQueryUSE, createQueryGeometry } = require('../utils/queries-v1');
 const { MOCK_RESULT_CARTODB } = require('../utils/test.constants');
 
-const should = chai.should();
+chai.should();
 const prefix = '/api/v1/geostore/use';
 
 let geostoreUSE;
