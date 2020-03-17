@@ -3,3 +3,5 @@
 - Update development dependencies
 - Update code style using common API Eslint rules
 - Update kubernetes configuration to have resource declaration
+- Improve admin queries to database
+- Add POST find-by-ids endpoint
