@@ -1,0 +1,5 @@
+- Update node to v12.x
+- Replace `npm` with `yarn`
+- Update development dependencies
+- Update code style using common API Eslint rules
+- Update kubernetes configuration to have resource declaration
