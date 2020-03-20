@@ -9,5 +9,8 @@
     "database": "gfw_geostore_db_test",
     "host": "mymachine",
     "port": 27017
+  },
+  "constants": {
+    "maxGeostoresFoundById": 2
   }
 }

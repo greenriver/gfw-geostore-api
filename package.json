@@ -4,11 +4,8 @@
   "description": "Global forest watch - GeoStore API",
   "main": "index.js",
   "scripts": {
-    "test-e2e": "NODE_PATH=app/src grunt --gruntfile app/Gruntfile.js e2eTest",
-    "test-unit": "NODE_PATH=app/src grunt --gruntfile app/Gruntfile.js unitTest",
+    "test": "NODE_PATH=app/src node $NODE_DEBUG_OPTION ./node_modules/.bin/grunt --gruntfile app/Gruntfile.js e2eTest",
     "start": "NODE_PATH=app/src node $NODE_DEBUG_OPTION app/index.js",
-    "test": "NODE_PATH=app/src node $NODE_DEBUG_OPTION ./node_modules/.bin/grunt --gruntfile app/Gruntfile.js test",
-    "migrate": "NODE_PATH=app/src node app/src/migrate/migrate.js",
     "coverage": "NODE_PATH=app/src node $NODE_DEBUG_OPTION ./node_modules/.bin/grunt --gruntfile app/Gruntfile.js nyc"
   },
   "repository": {
@@ -32,8 +29,12 @@
   "bugs": {
     "url": "https://github.com/gfw-api/gfw-geostore-api/issues"
   },
+  "engines": {
+    "node": "~12"
+  },
   "homepage": "https://github.com/gfw-api/gfw-geostore-api#readme",
   "dependencies": {
+    "@octokit/rest": "^16.28.7",
     "arcgis-to-geojson-utils": "^1.0.1",
     "bunyan": "1.7.1",
     "cartodb": "0.4.0",
@@ -44,7 +45,6 @@
     "country-data": "0.0.24",
     "ct-register-microservice-node": "^2.1.7",
     "geojsonhint": "1.2.0",
-    "@octokit/rest": "^16.28.7",
     "jsonapi-serializer": "^3.6.5",
     "koa": "^1.6.2",
     "koa-bodyparser": "2.0.1",
@@ -54,6 +54,7 @@
     "koa-validate": "0.2.11",
     "md5": "2.1.0",
     "mongoose": "4.13.19",
+    "mustache": "^2.3.2",
     "sleep": "^6.1.0",
     "turf": "^3.0.11"
   },
@@ -61,11 +62,12 @@
     "chai": "^4.2.0",
     "chai-http": "^4.3.0",
     "co-mocha": "^1.2.2",
-    "eslint": "^6.2.2",
+    "eslint": "^6.8.0",
     "eslint-config-airbnb": "^18.0.1",
-    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-import": "^2.20.1",
     "eslint-plugin-jsx-a11y": "^6.2.3",
-    "eslint-plugin-react": "^7.14.3",
+    "eslint-plugin-mocha": "^6.2.2",
+    "eslint-plugin-react": "^7.18.3",
     "grunt": "^1.0.4",
     "grunt-apidoc": "^0.11.0",
     "grunt-cli": "^1.3.2",
@@ -74,12 +76,22 @@
     "grunt-express-server": "^0.5.4",
     "grunt-mocha-test": "^0.13.3",
     "grunt-notify": "^0.4.5",
-    "grunt-simple-nyc": "^3.0.0",
+    "grunt-simple-nyc": "^3.0.1",
+    "husky": "^4.2.3",
+    "lint-staged": "^10.0.7",
     "load-grunt-tasks": "^5.1.0",
-    "nock": "^10.0.6",
-    "mocha": "^6.2.0",
-    "nyc": "^14.1.1",
+    "mocha": "^7.0.1",
+    "nock": "^12.0.0",
+    "nyc": "^15.0.0",
     "should": "^13.2.3",
     "should-http": "^0.1.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.js": "eslint --cache --fix"
   }
 }

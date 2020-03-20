@@ -10,7 +10,7 @@ const {
     getTestServer
 } = require('../utils/test-server');
 
-const should = chai.should();
+chai.should();
 
 let requester;
 nock.disableNetConnect();

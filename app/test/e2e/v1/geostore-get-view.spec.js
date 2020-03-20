@@ -6,7 +6,7 @@ const { createRequest } = require('../utils/test-server');
 const { createGeostore, ensureCorrectError } = require('../utils/utils');
 const { DEFAULT_GEOJSON } = require('../utils/test.constants');
 
-const should = chai.should();
+chai.should();
 
 const prefix = '/api/v1/geostore';
 let geostoreWDPA;

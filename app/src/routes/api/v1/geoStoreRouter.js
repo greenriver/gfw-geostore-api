@@ -2,6 +2,7 @@ const Router = require('koa-router');
 const logger = require('logger');
 const GeoStoreValidator = require('validators/geoStoreValidator');
 const GeoJSONSerializer = require('serializers/geoJSONSerializer');
+const GeoStoreListSerializer = require('serializers/geoStoreListSerializer');
 const AreaSerializer = require('serializers/areaSerializer');
 const CountryListSerializer = require('serializers/countryListSerializer');
 const CartoService = require('services/cartoDBService');
@@ -11,6 +12,7 @@ const ProviderNotFound = require('errors/providerNotFound');
 const GeoJSONNotFound = require('errors/geoJSONNotFound');
 const { geojsonToArcGIS } = require('arcgis-to-geojson-utils');
 const { arcgisToGeoJSON } = require('arcgis-to-geojson-utils');
+const config = require('config');
 
 const router = new Router({
     prefix: '/geostore'
@@ -37,6 +39,37 @@ class GeoStoreRouter {
         }
 
         this.body = GeoJSONSerializer.serialize(geoStore);
+
+    }
+
+    static async getMultipleGeoStores() {
+        this.assert(this.request.body.geostores, 400, 'Geostores not found');
+        const { geostores } = this.request.body;
+        if (!geostores || geostores.length === 0) {
+            this.throw(404, 'No GeoStores in payload');
+            return;
+        }
+        const ids = [...new Set(geostores.map((el) => el.trim()))];
+
+        logger.debug('Getting geostore by hash %s', ids);
+
+        const geoStores = await GeoStoreService.getMultipleGeostores(ids);
+        if (!geoStores || geoStores.length === 0) {
+            this.throw(404, 'No GeoStores found');
+            return;
+        }
+        const foundGeoStores = geoStores.length;
+        const geostoresFoundById = config.get('constants.maxGeostoresFoundById') > foundGeoStores ? foundGeoStores : config.get('constants.maxGeostoresFoundById');
+        logger.debug(`Found ${foundGeoStores} matching geostores. Returning ${geostoresFoundById}.`);
+        const slicedGeoStores = geoStores.slice(0, config.get('constants.maxGeostoresFoundById'));
+        const parsedData = {
+            geostores: slicedGeoStores,
+            geostoresFound: geoStores.map((el) => el.hash),
+            found: foundGeoStores,
+            returned: slicedGeoStores.length
+
+        };
+        this.body = GeoStoreListSerializer.serialize(parsedData);
 
     }
 
@@ -72,7 +105,7 @@ class GeoStoreRouter {
     }
 
     static* getArea() {
-        logger.info('Retreiving Polygon Area');
+        logger.info('Retrieving Polygon Area');
         try {
             const data = {
                 provider: this.request.body.provider,
@@ -204,6 +237,7 @@ class GeoStoreRouter {
 
 router.get('/:hash', GeoStoreRouter.getGeoStoreById);
 router.post('/', GeoStoreValidator.create, GeoStoreRouter.createGeoStore);
+router.post('/find-by-ids', GeoStoreRouter.getMultipleGeoStores);
 router.post('/area', GeoStoreValidator.create, GeoStoreRouter.getArea);
 router.get('/admin/:iso', GeoStoreRouter.getNational);
 router.get('/admin/list', GeoStoreRouter.getNationalList);

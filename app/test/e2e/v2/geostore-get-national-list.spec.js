@@ -7,16 +7,16 @@ const GeoStore = require('models/geoStore');
 const { createRequest } = require('../utils/test-server');
 const { createGeostore } = require('../utils/utils');
 const { createMockQueryCartoDB } = require('../utils/mock');
-const { createQueryISOName } = require('../utils/queries-v1');
+const { createQueryISOName } = require('../utils/queries-v2');
 
 chai.should();
-const prefix = '/api/v1/geostore/admin/list';
+const prefix = '/api/v2/geostore/admin/list';
 
 let listNational;
 nock.disableNetConnect();
 nock.enableNetConnect(process.env.HOST_IP);
 
-describe('Geostore v1 tests - Get list geostore national', () => {
+describe('Geostore v2 tests - Get list geostore national', () => {
 
     before(async () => {
         if (process.env.NODE_ENV !== 'test') {
@@ -49,8 +49,8 @@ describe('Geostore v1 tests - Get list geostore national', () => {
         });
     });
 
-    afterEach(() => {
-        GeoStore.remove({}).exec();
+    afterEach(async () => {
+        await GeoStore.remove({}).exec();
 
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);

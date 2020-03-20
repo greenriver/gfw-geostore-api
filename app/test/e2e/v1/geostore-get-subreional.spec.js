@@ -10,7 +10,7 @@ const { createMockQueryCartoDB } = require('../utils/mock');
 const { createQueryID1, createQueryGeometry } = require('../utils/queries-v1');
 const { DEFAULT_GEOJSON, MOCK_RESULT_CARTODB } = require('../utils/test.constants');
 
-const should = chai.should();
+chai.should();
 const prefix = '/api/v1/geostore/admin';
 
 let subnational;
@@ -54,7 +54,11 @@ describe('Geostore v1 tests - Get geostore subnational by id', () => {
     it('Getting subnational by id should return directly from db when it was created (happy case)', async () => {
         const testID = 123;
         const testISO = 'TEST123';
-        const createdSubnational = await createGeostore({ info: { iso: testISO, id1: testID , id2: null, gadm: '2.8'} });
+        const createdSubnational = await createGeostore({
+            info: {
+                iso: testISO, id1: testID, id2: null, gadm: '2.8'
+            }
+        });
 
         const response = await subnational.get(`/${testISO}/${testID}`);
 

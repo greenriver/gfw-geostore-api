@@ -7,7 +7,7 @@ const logger = require('logger');
 
 const { getTestServer } = require('../utils/test-server');
 
-const should = chai.should();
+chai.should();
 
 let requester;
 nock.disableNetConnect();
@@ -64,9 +64,9 @@ describe('Geostore v2 tests - Create geostores', () => {
                     type: 'FeatureCollection',
                     features: [{
                         type: 'Feature',
-                        "properties": {
-                        "some": "property"
-                      },
+                        properties: {
+                            some: 'property'
+                        },
                         geometry: {
                             type: 'MultiPoint',
                             coordinates: [

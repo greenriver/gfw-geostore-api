@@ -2,9 +2,9 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   labels:
-    name: {name}
+    name: geostore
     app: gfw
-  name: {name}
+  name: geostore
 spec:
   revisionHistoryLimit: 2
   template:
@@ -12,17 +12,19 @@ spec:
       annotations:
         chaos.alpha.kubernetes.io/enabled: "true"
       labels:
-        name: {name}
+        name: geostore
     spec:
       containers:
-      - name: {name}
-        image: vizzuality/{name}
+      - name: geostore
+        image: vizzuality/geostore
         imagePullPolicy: Always
         resources:
           requests:
-            memory: "128Mi"
+            cpu: "0.5"
+            memory: "256M"
           limits:
-            memory: "512Mi"
+            cpu: "1"
+            memory: "512M"
         args:
           - start
         env:
@@ -33,7 +35,7 @@ spec:
           - name: NODE_PATH
             value: app/src
           - name: LOCAL_URL
-            value: http://{name}.default.svc.cluster.local:3100
+            value: http://geostore.default.svc.cluster.local:3100
           - name: MONGO_URI
             valueFrom:
                 secretKeyRef:

@@ -8,7 +8,7 @@ const { createQueryWDPA } = require('../utils/queries-v2');
 const { createMockQueryCartoDB } = require('../utils/mock');
 const { MOCK_RESULT_CARTODB } = require('../utils/test.constants');
 
-const should = chai.should();
+chai.should();
 
 const prefix = '/api/v2/geostore/wdpa/';
 let geostoreWDPA;

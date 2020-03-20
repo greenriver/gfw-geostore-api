@@ -57,7 +57,7 @@ describe('Error serializer test', () => {
         feature.should.have.property('geometry');
         feature.geometry.should.be.an('object');
 
-        const geometry = feature.geometry;
+        const { geometry } = feature;
         geometry.should.have.property('type');
         geometry.type.should.be.equal(featureCollectionExample.features[0].geometry.type);
         geometry.should.have.a.property('coordinates');
@@ -79,7 +79,7 @@ describe('Error serializer test', () => {
         feature.should.have.property('geometry');
         feature.geometry.should.be.an('object');
 
-        const geometry = feature.geometry;
+        const { geometry } = feature;
         geometry.should.have.property('type');
         geometry.type.should.be.equal(featureCollectionExample.features[0].geometry.type);
         geometry.should.have.a.property('coordinates');
@@ -101,7 +101,7 @@ describe('Error serializer test', () => {
         feature.should.have.property('geometry');
         feature.geometry.should.be.an('object');
 
-        const geometry = feature.geometry;
+        const { geometry } = feature;
         geometry.should.have.property('type');
         geometry.type.should.be.equal(featureCollectionExample.features[0].geometry.type);
         geometry.should.have.a.property('coordinates');
@@ -118,7 +118,7 @@ describe('Error serializer test', () => {
         geometry.coordinates.should.length(geometryExample.coordinates.length);
     });
 
-    it('Get geometry from from feature collection', () => {
+    it('Get geometry from from feature collection - feature', () => {
         const geometry = GeoJSONConverter.getGeometry(featureExample);
         geometry.should.have.property('type');
         geometry.type.should.be.equal(geometryExample.type);
@@ -127,7 +127,7 @@ describe('Error serializer test', () => {
         geometry.coordinates.should.length(geometryExample.coordinates.length);
     });
 
-    it('Get geometry from from feature collection', () => {
+    it('Get geometry from from feature collection - geometry', () => {
         const geometry = GeoJSONConverter.getGeometry(geometryExample);
         geometry.should.have.property('type');
         geometry.type.should.be.equal(geometryExample.type);

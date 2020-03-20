@@ -1,9 +1,5 @@
-
 const logger = require('logger');
-const CoverageDuplicated = require('errors/coverageDuplicated');
-const CoverageNotFound = require('errors/coverageNotFound');
 const CartoDB = require('cartodb');
-const Mustache = require('mustache');
 const config = require('config');
 
 const ISO = `with c as (select the_geom_webmercator, st_area(the_geom_webmercator)/10000 as area_ha from gadm2_countries_simple where iso = UPPER('{{iso}}')),
@@ -38,14 +34,12 @@ const WORLD = `SELECT slug FROM coverage_layers where ST_INTERSECTS(the_geom, ST
 const REDUCED_WORLD = `with p as (SELECT slug, the_geom FROM coverage_layers {{{filter}}}) SELECT slug FROM p  where ST_INTERSECTS(the_geom, ST_SetSRID(ST_GeomFromGeoJSON('{{{geojson}}}'), 4326))`;
 
 
-const executeThunk = function (client, sql, params) {
-    return function (callback) {
-        client.execute(sql, params).done((data) => {
-            callback(null, data);
-        }).error((err) => {
-            callback(err[0], null);
-        });
-    };
+const executeThunk = (client, sql, params) => (callback) => {
+    client.execute(sql, params).done((data) => {
+        callback(null, data);
+    }).error((err) => {
+        callback(err[0], null);
+    });
 };
 
 

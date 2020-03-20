@@ -22,6 +22,16 @@
       ]
     },
     {
+      "url": "/v1/geostore/find-by-ids",
+      "method": "POST",
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/api/v1/geostore/find-by-ids"
+        }
+      ]
+    },
+    {
       "url": "/v1/geostore/area",
       "method": "POST",
       "endpoints": [
@@ -158,6 +168,16 @@
         {
           "method": "GET",
           "path": "/api/v1/coverage/intersect"
+        }
+      ]
+    },
+    {
+      "url": "/v2/geostore/find-by-ids",
+      "method": "POST",
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/api/v2/geostore/find-by-ids"
         }
       ]
     },

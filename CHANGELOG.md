@@ -1,0 +1,16 @@
+# v1.0.0
+
+## 19/03/2020
+
+- Add endpoint for finding geostores by ids.
+- Fix issue in loading ISO codes from Carto on v2 admin list endpoint
+
+## Previous
+
+- Update node to v12.x
+- Replace `npm` with `yarn`
+- Update development dependencies
+- Update code style using common API Eslint rules
+- Update kubernetes configuration to have resource declaration
+- Improve admin queries to database
+- Add POST find-by-ids endpoint

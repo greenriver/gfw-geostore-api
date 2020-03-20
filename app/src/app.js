@@ -48,19 +48,25 @@ async function init() {
             }));
 
             // catch errors and send in jsonapi standard. Always return vnd.api+json
-            app.use(function* (next) {
+            app.use(function* handleErrors(next) {
                 try {
                     yield next;
-                } catch (err) {
-                    this.status = err.status || 500;
+                } catch (inErr) {
+                    let error = inErr;
+                    try {
+                        error = JSON.parse(inErr);
+                    } catch (e) {
+                        logger.debug('Could not parse error message - is it JSON?: ', inErr);
+                        error = inErr;
+                    }
+                    this.status = error.status || this.status || 500;
                     if (this.status >= 500) {
                         logger.error(err);
                     } else {
                         logger.info(err);
                     }
 
-                    this.body = ErrorSerializer.serializeError(this.status, err.message || err);
-                    logger.debug(this.body);
+                    this.body = ErrorSerializer.serializeError(this.status, error.message);
                     if (process.env.NODE_ENV === 'prod' && this.status === 500) {
                         this.body = 'Unexpected error';
                     }
@@ -98,8 +104,8 @@ async function init() {
                 }).then(() => {
                     logger.info('Server started in ', process.env.PORT);
                     resolve({ app, server });
-                }, (err) => {
-                    logger.error(err);
+                }, (error) => {
+                    logger.error(error);
                     process.exit(1);
                 });
             });
