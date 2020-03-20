@@ -1,6 +1,9 @@
+# v1.0.0
+
 ## 19/03/2020
 
-- Fix issue in loading ISO codes from Carto on v2 admin list endpoint 
+- Add endpoint for finding geostores by ids.
+- Fix issue in loading ISO codes from Carto on v2 admin list endpoint
 
 ## Previous
 
