@@ -61,9 +61,9 @@ async function init() {
                     }
                     this.status = error.status || this.status || 500;
                     if (this.status >= 500) {
-                        logger.error(err);
+                        logger.error(error);
                     } else {
-                        logger.info(err);
+                        logger.info(error);
                     }
 
                     this.body = ErrorSerializer.serializeError(this.status, error.message);
