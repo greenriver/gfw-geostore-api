@@ -143,47 +143,7 @@ describe('Geostore v2 tests - Get geostore - National level', () => {
             .query({
                 q: 'SELECT ST_AsGeoJSON(ST_MAKEVALID(ST_Simplify(the_geom, 0.005))) AS geojson, area_ha, name_0 as name\n        FROM gadm36_countries\n        WHERE gid_0 = UPPER(\'USA\')'
             })
-            .reply(200, JSON.parse(fs.readFileSync(path.join(__dirname, 'resources', 'USA-request-one-reply.json'))), ['Server',
-                'openresty',
-                'Date',
-                'Thu, 14 Mar 2019 07:16:04 GMT',
-                'Content-Type',
-                'application/json; charset=utf-8',
-                'Content-Length',
-                '1091031',
-                'Connection',
-                'close',
-                'Vary',
-                'Accept-Encoding',
-                'Vary',
-                'Accept-Encoding',
-                'Access-Control-Allow-Origin',
-                '*',
-                'Access-Control-Allow-Headers',
-                'X-Requested-With, X-Prototype-Version, X-CSRF-Token, Authorization',
-                'vary',
-                'Authorization',
-                'X-SQLAPI-Log',
-                '{"request":{"sql":{"type":"query","sql":"SELECT ST AsGeoJSON ST Simplify the geom  0 005   AS geojson  area ha  name 0 as name         FROM gadm36 countries         WHERE gid 0   UPPER  USA  "}}}',
-                'Content-Disposition',
-                'inline; filename=cartodb-query.json; modification-date="Thu, 14 Mar 2019 07:07:41 GMT";',
-                'Cache-Control',
-                'no-cache,max-age=31536000,must-revalidate,public',
-                'Surrogate-Key',
-                't:gCSLeN',
-                'Last-Modified',
-                'Wed, 17 Oct 2018 15:52:41 GMT',
-                'X-SQLAPI-Profiler',
-                '{"authorization":8,"getConnectionParams":4,"getUserTimeoutLimits":1,"queryExplain":11,"beforeSink":914,"total":938}',
-                'X-Varnish',
-                '819430099 837648736',
-                'Age',
-                '502',
-                'X-Cache',
-                'HIT',
-                'Accept-Ranges',
-                'bytes'
-            ]);
+            .reply(200, JSON.parse(fs.readFileSync(path.join(__dirname, 'resources', 'USA-request-one-reply.json'))));
 
         const response = await requester.get(`/api/v2/geostore/admin/USA?simplify=0.005`).send();
 

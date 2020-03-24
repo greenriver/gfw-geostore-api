@@ -7,13 +7,12 @@ const loader = require('loader');
 const validate = require('koa-validate');
 const mongoose = require('mongoose');
 const ErrorSerializer = require('serializers/errorSerializer');
-
-const mongoUri = process.env.MONGO_URI || `mongodb://${config.get('mongodb.host')}:${config.get('mongodb.port')}/${config.get('mongodb.database')}`;
+const convert = require('koa-convert');
+const koaSimpleHealthCheck = require('koa-simple-healthcheck');
 const ctRegisterMicroservice = require('ct-register-microservice-node');
 const sleep = require('sleep');
 
-// const nock = require('nock');
-// nock.recorder.rec();
+const mongoUri = process.env.MONGO_URI || `mongodb://${config.get('mongodb.host')}:${config.get('mongodb.port')}/${config.get('mongodb.database')}`;
 
 let retries = 10;
 
@@ -42,6 +41,8 @@ async function init() {
             if (process.env.NODE_ENV === 'dev') {
                 app.use(koaLogger());
             }
+
+            app.use(convert.back(koaSimpleHealthCheck()));
 
             app.use(bodyParser({
                 jsonLimit: '50mb'
@@ -111,9 +112,7 @@ async function init() {
             });
 
             logger.info(`Server started in port:${port}`);
-
         }
-
 
         logger.info(`Connecting to MongoDB URL ${mongoUri}`);
 
