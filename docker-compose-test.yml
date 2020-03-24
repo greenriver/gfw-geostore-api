@@ -13,6 +13,7 @@ services:
       API_VERSION: v1
       STAMPERY_TOKEN: token
       MONGO_PORT_27017_TCP_ADDR: mongo
+      CT_REGISTER_MODE: auto
     command: test
     depends_on:
       - mongo
