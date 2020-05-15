@@ -1,9 +1,7 @@
 {
   "logger": {
     "name": "gfw-geostore-api",
-    "level": "debug",
-    "toFile": false,
-    "dirLogFile": null
+    "level": "info"
   },
   "service": {
     "uri": "http://172.31.40.31:3100"
