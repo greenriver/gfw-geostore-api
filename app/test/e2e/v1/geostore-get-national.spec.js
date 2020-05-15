@@ -25,7 +25,7 @@ describe('Geostore v1 tests - Get geostore - National level', () => {
 
         requester = await getTestServer();
 
-        GeoStore.remove({}).exec();
+        GeoStore.deleteMany({}).exec();
 
         nock.cleanAll();
     });
@@ -138,6 +138,6 @@ describe('Geostore v1 tests - Get geostore - National level', () => {
     });
 
     after(() => {
-        GeoStore.remove({}).exec();
+        GeoStore.deleteMany({}).exec();
     });
 });

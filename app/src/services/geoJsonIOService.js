@@ -1,8 +1,8 @@
 const logger = require('logger');
 const ErrorCreatingGist = require('errors/errorCreatingGist');
-const GitHubApi = require('@octokit/rest');
+const { Octokit } = require('@octokit/rest');
 
-const github = new GitHubApi({
+const github = new Octokit({
     version: '3.0.0',
     protocol: 'https'
 });

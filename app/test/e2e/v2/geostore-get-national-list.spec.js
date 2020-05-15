@@ -50,7 +50,7 @@ describe('Geostore v2 tests - Get list geostore national', () => {
     });
 
     afterEach(async () => {
-        await GeoStore.remove({}).exec();
+        await GeoStore.deleteMany({}).exec();
 
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);
