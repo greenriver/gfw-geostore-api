@@ -46,13 +46,15 @@ describe('Geostore v1 tests - Getting geodata by wdpa', () => {
             type: DEFAULT_GEOJSON.type
         };
 
-        view_link.should.equal(`http://geojson.io/#data=data:application/json,${encodeURIComponent(
-            JSON.stringify(expectedGEOJSON)
-        )}`);
+        view_link.should.match(/^http:\/\/geojson.io\/#data=data:application\/json/);
+        const responseJSONEncodedString = view_link.replace('http://geojson.io/#data=data:application/json,', '');
+        const responseJSON = JSON.parse(decodeURIComponent(responseJSONEncodedString));
+
+        responseJSON.should.deep.equal(expectedGEOJSON);
     });
 
     afterEach(async () => {
-        GeoStore.remove({}).exec();
+        GeoStore.deleteMany({}).exec();
 
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);

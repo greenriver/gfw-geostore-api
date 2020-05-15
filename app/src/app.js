@@ -11,6 +11,7 @@ const convert = require('koa-convert');
 const koaSimpleHealthCheck = require('koa-simple-healthcheck');
 const ctRegisterMicroservice = require('ct-register-microservice-node');
 const sleep = require('sleep');
+const mongooseOptions = require('../../config/mongoose');
 
 const mongoUri = process.env.MONGO_URI || `mongodb://${config.get('mongodb.host')}:${config.get('mongodb.port')}/${config.get('mongodb.database')}`;
 
@@ -24,7 +25,7 @@ async function init() {
                     retries--;
                     logger.error(`Failed to connect to MongoDB uri ${mongoUri}, retrying...`);
                     sleep.sleep(5);
-                    mongoose.connect(mongoUri, onDbReady);
+                    mongoose.connect(mongoUri, mongooseOptions, onDbReady);
                 } else {
                     logger.error('MongoURI', mongoUri);
                     logger.error(err);
@@ -116,28 +117,8 @@ async function init() {
 
         logger.info(`Connecting to MongoDB URL ${mongoUri}`);
 
-        let dbOptions = {};
-        if (mongoUri.indexOf('replicaSet') > -1) {
-            dbOptions = {
-                db: { native_parser: true },
-                replset: {
-                    auto_reconnect: false,
-                    poolSize: 10,
-                    socketOptions: {
-                        keepAlive: 1000,
-                        connectTimeoutMS: 30000
-                    }
-                },
-                server: {
-                    poolSize: 5,
-                    socketOptions: {
-                        keepAlive: 1000,
-                        connectTimeoutMS: 30000
-                    }
-                }
-            };
-        }
-        mongoose.connect(mongoUri, dbOptions, onDbReady);
+
+        mongoose.connect(mongoUri, mongooseOptions, onDbReady);
 
 
     });
