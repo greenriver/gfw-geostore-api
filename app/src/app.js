@@ -10,6 +10,7 @@ const ErrorSerializer = require('serializers/errorSerializer');
 const koaSimpleHealthCheck = require('koa-simple-healthcheck');
 const ctRegisterMicroservice = require('ct-register-microservice-node');
 const sleep = require('sleep');
+const mongooseOptions = require('../../config/mongoose');
 
 const mongooseOptions = require('../../config/mongoose');
 
