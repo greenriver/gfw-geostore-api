@@ -90,7 +90,7 @@ describe('Geostore v2 tests - Getting geodata by wdpa', () => {
     });
 
     afterEach(async () => {
-        GeoStore.remove({}).exec();
+        GeoStore.deleteMany({}).exec();
 
         if (!nock.isDone()) {
             throw new Error(`Not all nock interceptors were used: ${nock.pendingMocks()}`);

@@ -28,7 +28,7 @@ describe('Geostore v2 tests - Get geostore - SubRegional (admin-2) level', () =>
 
         requester = await getTestServer();
 
-        GeoStore.remove({}).exec();
+        GeoStore.deleteMany({}).exec();
 
         nock.cleanAll();
     });
@@ -145,6 +145,6 @@ describe('Geostore v2 tests - Get geostore - SubRegional (admin-2) level', () =>
     });
 
     after(() => {
-        GeoStore.remove({}).exec();
+        GeoStore.deleteMany({}).exec();
     });
 });

@@ -26,7 +26,7 @@ describe('Geostore v2 tests - Get multiple geostorea', () => {
 
         requester = await getTestServer();
 
-        GeoStore.remove({}).exec();
+        GeoStore.deleteMany({}).exec();
 
         nock.cleanAll();
     });
@@ -100,6 +100,6 @@ describe('Geostore v2 tests - Get multiple geostorea', () => {
     });
 
     after(() => {
-        GeoStore.remove({}).exec();
+        GeoStore.deleteMany({}).exec();
     });
 });
