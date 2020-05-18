@@ -1,4 +1,13 @@
+# v1.1.2
+
+## 18/05/2020
+
+- Upgrade `koa` to v2.x
+
+
 # v1.1.1
+
+## 15/05/2020
 
 - Upgrade `mongoose` to v5.x
 
