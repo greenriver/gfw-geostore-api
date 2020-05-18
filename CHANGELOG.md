@@ -15,8 +15,6 @@
 
 ## 15/05/2020
 
-# v1.1.1
-
 - Upgrade `mongoose` to v5.x
 
 # v1.1.0
