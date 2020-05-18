@@ -34,14 +34,13 @@ const WORLD = `SELECT slug FROM coverage_layers where ST_INTERSECTS(the_geom, ST
 const REDUCED_WORLD = `with p as (SELECT slug, the_geom FROM coverage_layers {{{filter}}}) SELECT slug FROM p  where ST_INTERSECTS(the_geom, ST_SetSRID(ST_GeomFromGeoJSON('{{{geojson}}}'), 4326))`;
 
 
-const executeThunk = (client, sql, params) => (callback) => {
+const executeThunk = (client, sql, params) => new Promise(((resolve, reject) => {
     client.execute(sql, params).done((data) => {
-        callback(null, data);
+        resolve(data);
     }).error((err) => {
-        callback(err[0], null);
+        reject(err[0]);
     });
-};
-
+}));
 
 class CoverageServiceV2 {
 
@@ -51,34 +50,34 @@ class CoverageServiceV2 {
         });
     }
 
-    * getNational(iso) {
+    async getNational(iso) {
         logger.debug('Obtaining national of iso %s', iso);
         const params = {
             iso
         };
 
-        const data = yield executeThunk(this.client, ISO, params);
+        const data = await executeThunk(this.client, ISO, params);
         if (data.rows && data.rows.length > 0) {
             return data.rows.map((item) => item.slug);
         }
         return [];
     }
 
-    * getSubnational(iso, id1) {
+    async getSubnational(iso, id1) {
         logger.debug('Obtaining subnational of iso %s and id1', iso, id1);
         const params = {
             iso,
             id1
         };
 
-        const data = yield executeThunk(this.client, ID1, params);
+        const data = await executeThunk(this.client, ID1, params);
         if (data.rows && data.rows.length > 0) {
             return data.rows.map((item) => item.slug);
         }
         return [];
     }
 
-    * getUse(useTable, id) {
+    async getUse(useTable, id) {
         logger.debug('Obtaining use with id %s', id);
 
         const params = {
@@ -86,7 +85,7 @@ class CoverageServiceV2 {
             pid: id
         };
 
-        const data = yield executeThunk(this.client, USE, params);
+        const data = await executeThunk(this.client, USE, params);
 
         if (data.rows && data.rows.length > 0) {
             return data.rows.map((item) => item.slug);
@@ -94,28 +93,28 @@ class CoverageServiceV2 {
         return [];
     }
 
-    * getWdpa(wdpaid) {
+    async getWdpa(wdpaid) {
         logger.debug('Obtaining wpda of id %s', wdpaid);
 
         const params = {
             wdpaid
         };
 
-        const data = yield executeThunk(this.client, WDPA, params);
+        const data = await executeThunk(this.client, WDPA, params);
         if (data.rows && data.rows.length > 0) {
             return data.rows.map((item) => item.slug);
         }
         return [];
     }
 
-    * getCoverages() {
+    async getCoverages() {
         logger.info('Getting coverages');
 
-        const data = yield executeThunk(this.client, COVERAGES);
+        const data = await executeThunk(this.client, COVERAGES);
         return data;
     }
 
-    * getWorld(geojson, { slugs }) {
+    async getWorld(geojson, { slugs }) {
         logger.info('Getting layers that intersect');
 
         const params = {
@@ -123,7 +122,7 @@ class CoverageServiceV2 {
             filter: slugs && slugs.length && `WHERE slug IN (${slugs.map((slug) => `'${slug.trim()}'`).join(',')})`
         };
         const query = slugs ? REDUCED_WORLD : WORLD;
-        const data = yield executeThunk(this.client, query, params);
+        const data = await executeThunk(this.client, query, params);
         if (data.rows && data.rows.length > 0) {
             return data.rows.map((item) => item.slug);
         }

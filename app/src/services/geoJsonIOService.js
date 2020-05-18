@@ -10,7 +10,7 @@ const MAX_URL_LEN = 150e3;
 
 class GeoJsonIOService {
 
-    static* view(geojson) {
+    static async view(geojson) {
 
         // if this is a multipolygon, grab the first feature in the collection
         // and ditch the rest-- only need type and coordinates properties
@@ -36,7 +36,7 @@ class GeoJsonIOService {
 
         }
         logger.debug('saving to github gist');
-        const res = yield github.gists.create({
+        const res = await github.gists.create({
             description: '',
             public: true,
             files: {
