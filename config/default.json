@@ -1,7 +1,7 @@
 {
   "logger": {
     "name": "gfw-geostore-api-DEV",
-    "level": "debug",
+    "level": "info",
     "toFile": false,
     "dirLogFile": null
   },
@@ -14,7 +14,8 @@
   "mongodb": {
     "database": "gfw_geostore_db",
     "host": "127.0.0.1",
-    "port": 27017
+    "port": 27017,
+    "useUnifiedTopology": true
   },
   "cartoDB": {
     "user": null

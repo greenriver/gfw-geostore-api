@@ -17,8 +17,8 @@ module.exports = (() => {
             const newPath = path ? (`${path}/${file}`) : file;
             const stat = fs.statSync(newPath);
             if (!stat.isDirectory()) {
-                if (file.lastIndexOf('Router.js') !== -1) {
-                    if (file === 'indexRouter.js') {
+                if (file.lastIndexOf('.router.js') !== -1) {
+                    if (file === 'index.router.js') {
                         existIndexRouter = true;
                     } else {
                         logger.debug('Loading route %s, in path %s', newPath, pathApi);
@@ -37,7 +37,7 @@ module.exports = (() => {
         });
         if (existIndexRouter) {
             // load indexRouter when finish other Router
-            const newPath = path ? (`${path}/indexRouter.js`) : 'indexRouter.js';
+            const newPath = path ? (`${path}/index.router.js`) : 'index.router.js';
             logger.debug('Loading route %s, in path %s', newPath, pathApi);
             if (pathApi) {
                 app.use(mount(pathApi, require(newPath).middleware()));

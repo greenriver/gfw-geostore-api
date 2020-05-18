@@ -21,34 +21,34 @@ const router = new Router({
 
 class GeoStoreRouterV2 {
 
-    static* getGeoStoreById() {
-        this.assert(this.params.hash, 400, 'Hash param not found');
-        logger.debug('Getting geostore by hash %s', this.params.hash);
+    static async getGeoStoreById(ctx) {
+        ctx.assert(ctx.params.hash, 400, 'Hash param not found');
+        logger.info('[GeoStoreRouterV2 - getGeoStoreById] Getting geostore by hash %s', ctx.params.hash);
 
-        let geoStore = yield GeoStoreServiceV2.getGeostoreById(this.params.hash);
+        let geoStore = await GeoStoreServiceV2.getGeostoreById(ctx.params.hash);
         if (!geoStore) {
-            this.throw(404, 'GeoStore not found');
+            ctx.throw(404, 'GeoStore not found');
             return;
         }
         logger.debug('GeoStore found. Returning...');
         if (!geoStore.bbox) {
-            geoStore = yield GeoStoreServiceV2.calculateBBox(geoStore);
+            geoStore = await GeoStoreServiceV2.calculateBBox(geoStore);
         }
-        if (this.query.format && this.query.format === 'esri') {
+        if (ctx.query.format && ctx.query.format === 'esri') {
             logger.debug('esri', geojsonToArcGIS(geoStore.geojson)[0]);
             geoStore.esrijson = geojsonToArcGIS(geoStore.geojson)[0].geometry;
         }
 
-        this.body = GeoJSONSerializer.serialize(geoStore);
+        ctx.body = GeoJSONSerializer.serialize(geoStore);
     }
 
-    static async getMultipleGeoStores() {
-        this.assert(this.request.body.geostores, 400, 'Geostores not found');
-        logger.info('[V2 geoStoreRouter - getMultipleGeoStores] Getting geostore by ids %s', this.request.body.geostores);
-        const { geostores } = this.request.body;
+    static async getMultipleGeoStores(ctx) {
+        ctx.assert(ctx.request.body.geostores, 400, 'Geostores not found');
+        logger.info('[V2 geoStoreRouter - getMultipleGeoStores] Getting geostore by ids %s', ctx.request.body.geostores);
+        const { geostores } = ctx.request.body;
         // filter duplicates
         if (!geostores || geostores.length === 0) {
-            this.throw(404, 'No GeoStores in payload');
+            ctx.throw(404, 'No GeoStores in payload');
             return;
         }
         const ids = [...new Set(geostores.map((el) => el.trim()))];
@@ -57,7 +57,7 @@ class GeoStoreRouterV2 {
 
         const geoStores = await GeoStoreServiceV2.getMultipleGeostores(ids);
         if (!geoStores || geoStores.length === 0) {
-            this.throw(404, 'No GeoStores found');
+            ctx.throw(404, 'No GeoStores found');
             return;
         }
         const foundGeoStores = geoStores.length;
@@ -71,134 +71,134 @@ class GeoStoreRouterV2 {
             returned: slicedGeoStores.length
 
         };
-        this.body = GeoStoreListSerializer.serialize(parsedData);
+        ctx.body = GeoStoreListSerializer.serialize(parsedData);
     }
 
-    static* createGeoStore() {
+    static async createGeoStore(ctx) {
         logger.info('Saving GeoStore');
         try {
             const data = {
-                provider: this.request.body.provider,
+                provider: ctx.request.body.provider,
                 info: {},
-                lock: this.request.body.lock ? this.request.body.lock : false
+                lock: ctx.request.body.lock ? ctx.request.body.lock : false
             };
-            if (!this.request.body.geojson && !this.request.body.esrijson && !this.request.body.provider) {
-                this.throw(400, 'geojson, esrijson or provider required');
+            if (!ctx.request.body.geojson && !ctx.request.body.esrijson && !ctx.request.body.provider) {
+                ctx.throw(400, 'geojson, esrijson or provider required');
                 return;
             }
-            if (this.request.body.esrijson) {
-                this.request.body.geojson = arcgisToGeoJSON(this.request.body.esrijson);
+            if (ctx.request.body.esrijson) {
+                ctx.request.body.geojson = arcgisToGeoJSON(ctx.request.body.esrijson);
             }
 
-            const geostore = yield GeoStoreServiceV2.saveGeostore(this.request.body.geojson, data);
+            const geostore = await GeoStoreServiceV2.saveGeostore(ctx.request.body.geojson, data);
             if (process.env.NODE_ENV !== 'test' || geostore.geojson.length < 2000) {
                 logger.debug(JSON.stringify(geostore.geojson));
             }
-            this.body = GeoJSONSerializer.serialize(geostore);
+            ctx.body = GeoJSONSerializer.serialize(geostore);
         } catch (err) {
             if (err instanceof ProviderNotFound || err instanceof GeoJSONNotFound) {
-                this.throw(400, err.message);
+                ctx.throw(400, err.message);
                 return;
             }
             throw err;
         }
     }
 
-    static* getArea() {
+    static async getArea(ctx) {
         logger.info('Retrieving Polygon Area');
         try {
             const data = {
-                provider: this.request.body.provider,
+                provider: ctx.request.body.provider,
                 info: {},
-                lock: this.request.body.lock ? this.request.body.lock : false
+                lock: ctx.request.body.lock ? ctx.request.body.lock : false
             };
-            if (!this.request.body.geojson && !this.request.body.esrijson && !this.request.body.provider) {
-                this.throw(400, 'geojson, esrijson or provider required');
+            if (!ctx.request.body.geojson && !ctx.request.body.esrijson && !ctx.request.body.provider) {
+                ctx.throw(400, 'geojson, esrijson or provider required');
                 return;
             }
-            if (this.request.body.esrijson) {
-                this.request.body.geojson = arcgisToGeoJSON(this.request.body.esrijson);
+            if (ctx.request.body.esrijson) {
+                ctx.request.body.geojson = arcgisToGeoJSON(ctx.request.body.esrijson);
             }
-            const geostore = yield GeoStoreServiceV2.calculateArea(this.request.body.geojson, data);
+            const geostore = await GeoStoreServiceV2.calculateArea(ctx.request.body.geojson, data);
             if (process.env.NODE_ENV !== 'test' || geostore.geojson.length < 2000) {
                 logger.debug(JSON.stringify(geostore.geojson));
             }
-            this.body = AreaSerializer.serialize(geostore);
+            ctx.body = AreaSerializer.serialize(geostore);
         } catch (err) {
             if (err instanceof ProviderNotFound || err instanceof GeoJSONNotFound) {
-                this.throw(400, err.message);
+                ctx.throw(400, err.message);
                 return;
             }
             throw err;
         }
     }
 
-    static* getNational() {
+    static async getNational(ctx) {
         logger.info('Obtaining national data geojson (GADM v3.6)');
-        const thresh = this.query.simplify ? JSON.parse(this.query.simplify.toLowerCase()) : null;
+        const thresh = ctx.query.simplify ? JSON.parse(ctx.query.simplify.toLowerCase()) : null;
 
         if (thresh && typeof thresh === Number && (thresh > 1 || thresh <= 0)) {
-            this.throw(404, 'Bad threshold for simplify. Must be in range 0-1.');
+            ctx.throw(404, 'Bad threshold for simplify. Must be in range 0-1.');
         } else if (thresh && typeof thresh === Boolean && thresh !== true) {
-            this.throw(404, 'Bad syntax for simplify. Must be "true".');
+            ctx.throw(404, 'Bad syntax for simplify. Must be "true".');
         }
-        const data = yield CartoServiceV2.getNational(this.params.iso, thresh);
+        const data = await CartoServiceV2.getNational(ctx.params.iso, thresh);
         if (!data) {
-            this.throw(404, 'Country not found');
+            ctx.throw(404, 'Country not found');
         }
-        this.body = GeoJSONSerializer.serialize(data);
+        ctx.body = GeoJSONSerializer.serialize(data);
     }
 
-    static* getNationalList() {
+    static async getNationalList(ctx) {
         logger.info('Obtaining national list (GADM v3.6)');
-        const data = yield CartoServiceV2.getNationalList();
+        const data = await CartoServiceV2.getNationalList();
         if (!data) {
-            this.throw(404, 'Empty List');
+            ctx.throw(404, 'Empty List');
         }
-        this.body = CountryListSerializer.serialize(data);
+        ctx.body = CountryListSerializer.serialize(data);
     }
 
-    static* getSubnational() {
+    static async getSubnational(ctx) {
         logger.info('Obtaining subnational data geojson (GADM v3.6)');
-        const thresh = this.query.simplify ? JSON.parse(this.query.simplify.toLowerCase()) : null;
+        const thresh = ctx.query.simplify ? JSON.parse(ctx.query.simplify.toLowerCase()) : null;
 
         if (thresh && typeof thresh === Number && (thresh > 1 || thresh <= 0)) {
-            this.throw(404, 'Bad threshold for simplify. Must be in range 0-1.');
+            ctx.throw(404, 'Bad threshold for simplify. Must be in range 0-1.');
         } else if (thresh && typeof thresh === Boolean && thresh !== true) {
-            this.throw(404, 'Bad syntax for simplify. Must be "true".');
+            ctx.throw(404, 'Bad syntax for simplify. Must be "true".');
         }
-        const data = yield CartoServiceV2.getSubnational(this.params.iso, this.params.id1, thresh);
+        const data = await CartoServiceV2.getSubnational(ctx.params.iso, ctx.params.id1, thresh);
         if (!data) {
-            this.throw(404, 'Location does not exist.');
+            ctx.throw(404, 'Location does not exist.');
         }
-        this.body = GeoJSONSerializer.serialize(data);
+        ctx.body = GeoJSONSerializer.serialize(data);
     }
 
-    static* getRegional() {
+    static async getRegional(ctx) {
         logger.info('Obtaining Admin2 data geojson (GADM v3.6)');
-        const thresh = this.query.simplify ? JSON.parse(this.query.simplify.toLowerCase()) : null;
+        const thresh = ctx.query.simplify ? JSON.parse(ctx.query.simplify.toLowerCase()) : null;
 
         if (thresh && typeof thresh === Number && (thresh > 1 || thresh <= 0)) {
-            this.throw(404, 'Bad threshold for simplify. Must be in range 0-1.');
+            ctx.throw(404, 'Bad threshold for simplify. Must be in range 0-1.');
         } else if (thresh && typeof thresh === Boolean && thresh !== true) {
-            this.throw(404, 'Bad syntax for simplify. Must be "true".');
+            ctx.throw(404, 'Bad syntax for simplify. Must be "true".');
         }
-        const data = yield CartoServiceV2.getRegional(this.params.iso, this.params.id1, this.params.id2, thresh);
+        const data = await CartoServiceV2.getRegional(ctx.params.iso, ctx.params.id1, ctx.params.id2, thresh);
         if (!data) {
-            this.throw(404, 'Location does not exist.');
+            ctx.throw(404, 'Location does not exist.');
         }
-        this.body = GeoJSONSerializer.serialize(data);
+        ctx.body = GeoJSONSerializer.serialize(data);
     }
 
-    static* use() {
-        logger.info('Obtaining use data with name %s and id %s', this.params.name, this.params.id);
-        const thresh = this.query.simplify ? JSON.parse(this.query.simplify.toLowerCase()) : null;
+    static async use(ctx) {
+        logger.info('Obtaining use data with name %s and id %s', ctx.params.name, ctx.params.id);
+        const thresh = ctx.query.simplify ? JSON.parse(ctx.query.simplify.toLowerCase()) : null;
         if (thresh && typeof thresh === Boolean && thresh !== true) {
-            this.throw(404, 'Bad syntax for simplify. Must be "true".');
+            ctx.throw(404, 'Bad syntax for simplify. Must be "true".');
         }
 
         let useTable = null;
-        switch (this.params.name) {
+        switch (ctx.params.name) {
 
             case 'mining':
                 useTable = 'gfw_mining';
@@ -216,42 +216,42 @@ class GeoStoreRouterV2 {
                 useTable = 'tcl';
                 break;
             default:
-                useTable = this.params.name;
+                useTable = ctx.params.name;
 
         }
         if (!useTable) {
-            this.throw(404, 'Name not found');
+            ctx.throw(404, 'Name not found');
         }
-        const data = yield CartoServiceV2.getUse(useTable, this.params.id, thresh);
+        const data = await CartoServiceV2.getUse(useTable, ctx.params.id, thresh);
         if (!data) {
-            this.throw(404, 'Use not found');
+            ctx.throw(404, 'Use not found');
         }
-        this.body = GeoJSONSerializer.serialize(data);
+        ctx.body = GeoJSONSerializer.serialize(data);
     }
 
-    static* wdpa() {
-        logger.info('Obtaining wpda data with id %s', this.params.id);
-        const data = yield CartoServiceV2.getWdpa(this.params.id);
+    static async wdpa(ctx) {
+        logger.info('Obtaining wpda data with id %s', ctx.params.id);
+        const data = await CartoServiceV2.getWdpa(ctx.params.id);
         if (!data) {
-            this.throw(404, 'Wdpa not found');
+            ctx.throw(404, 'Wdpa not found');
         }
-        this.body = GeoJSONSerializer.serialize(data);
+        ctx.body = GeoJSONSerializer.serialize(data);
     }
 
-    static* view() {
-        this.assert(this.params.hash, 400, 'Hash param not found');
-        logger.debug('Getting geostore by hash %s', this.params.hash);
+    static async view(ctx) {
+        ctx.assert(ctx.params.hash, 400, 'Hash param not found');
+        logger.debug('Getting geostore by hash %s', ctx.params.hash);
 
-        const geoStore = yield GeoStoreServiceV2.getGeostoreById(this.params.hash);
+        const geoStore = await GeoStoreServiceV2.getGeostoreById(ctx.params.hash);
 
         if (!geoStore) {
-            this.throw(404, 'GeoStore not found');
+            ctx.throw(404, 'GeoStore not found');
             return;
         }
         logger.debug('GeoStore found. Returning...');
 
-        const geojsonIoPath = yield GeoJsonIOService.view(geoStore.geojson);
-        this.body = { view_link: geojsonIoPath };
+        const geojsonIoPath = await GeoJsonIOService.view(geoStore.geojson);
+        ctx.body = { view_link: geojsonIoPath };
     }
 
 }
@@ -260,8 +260,8 @@ router.get('/:hash', GeoStoreRouterV2.getGeoStoreById);
 router.post('/', GeoStoreValidator.create, GeoStoreRouterV2.createGeoStore);
 router.post('/find-by-ids', GeoStoreRouterV2.getMultipleGeoStores);
 router.post('/area', GeoStoreValidator.create, GeoStoreRouterV2.getArea);
-router.get('/admin/:iso', GeoStoreRouterV2.getNational);
 router.get('/admin/list', GeoStoreRouterV2.getNationalList);
+router.get('/admin/:iso', GeoStoreRouterV2.getNational);
 router.get('/admin/:iso/:id1', GeoStoreRouterV2.getSubnational);
 router.get('/admin/:iso/:id1/:id2', GeoStoreRouterV2.getRegional);
 router.get('/use/:name/:id', GeoStoreRouterV2.use);
