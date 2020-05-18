@@ -44,7 +44,7 @@ spec:
           - name: LOCAL_URL
             value: http://geostore.default.svc.cluster.local:3100
           - name: MONGO_USE_UNIFIED_TOPOLOGY
-            value: false
+            value: "false"
           - name: MONGO_URI
             valueFrom:
                 secretKeyRef:
