@@ -1,9 +1,6 @@
 {
   "logger": {
-    "name": "gfw-geostore-api-TEST",
-    "level": "debug",
-    "toFile": false,
-    "dirLogFile": null
+    "name": "gfw-geostore-api-TEST"
   },
   "mongodb": {
     "database": "gfw_geostore_db_test",

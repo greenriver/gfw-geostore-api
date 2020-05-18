@@ -47,17 +47,17 @@ const SIMPLIFIED_USE = `SELECT ST_Area(geography(the_geom))/10000 as area_ha, th
         FROM {{use}}
         WHERE cartodb_id = {{id}}`;
 
-const executeThunk = (client, sql, params, thresh) => (callback) => {
+const executeThunk = (client, sql, params, thresh) => new Promise(((resolve, reject) => {
     // eslint-disable-next-line no-param-reassign
     sql = sql.replace('{geom}', thresh ? `ST_Simplify(the_geom, ${thresh})` : 'the_geom')
         .replace('{geom}', thresh ? `ST_Simplify(the_geom, ${thresh})` : 'the_geom');
     logger.debug(Mustache.render(sql, params, thresh));
     client.execute(sql, params).done((data) => {
-        callback(null, data);
+        resolve(data);
     }).error((err) => {
-        callback(err, null);
+        reject(err);
     });
-};
+}));
 
 const parseSimplifyGeom = (iso, id1, id2) => {
     const bigCountries = ['USA', 'RUS', 'CAN', 'CHN', 'BRA', 'IDN'];
@@ -78,8 +78,8 @@ class CartoDBServiceV2 {
         });
     }
 
-    * getNational(iso, thresh) {
-        logger.debug('Request %s to carto', iso);
+    async getNational(iso, thresh) {
+        logger.info(`[CartoDBServiceV2 - getNational] Requesting ISO ${iso} from carto`);
         const params = {
             iso: iso.toUpperCase()
         };
@@ -89,24 +89,25 @@ class CartoDBServiceV2 {
             thresh = parseSimplifyGeom(iso);
         }
 
-        logger.debug('Checking existing national geo');
+        logger.debug('[CartoDBServiceV2 - getNational] Checking for existing national geo');
         const query = {
             'info.iso': iso.toUpperCase(),
             'info.simplifyThresh': thresh,
             'info.id1': null,
             'info.id2': null,
         };
-        let existingGeo = yield GeoStoreServiceV2.getGeostoreByInfoProps(query);
-        logger.debug('Existed geo', existingGeo);
+        let existingGeo = await GeoStoreServiceV2.getGeostoreByInfoProps(query);
         if (existingGeo) {
-            logger.debug('Return national geojson stored');
+            logger.debug('[CartoDBServiceV2 - getNational] Found geometry with id:', existingGeo._id);
+            logger.debug('[CartoDBServiceV2 - getNational] Return national geojson stored');
             return existingGeo;
         }
+        logger.debug('[CartoDBServiceV2 - getNational] No matching geometry found.');
 
-        const data = yield executeThunk(this.client, ISO, params, thresh);
+        const data = await executeThunk(this.client, ISO, params, thresh);
         if (data.rows && data.rows.length > 0) {
             const result = data.rows[0];
-            logger.debug('Saving national geostore');
+            logger.debug('[CartoDBServiceV2 - getNational] Saving national geostore');
             const geoData = {
                 info: {
                     iso: iso.toUpperCase(),
@@ -115,23 +116,23 @@ class CartoDBServiceV2 {
                     simplifyThresh: thresh
                 }
             };
-            existingGeo = yield GeoStoreServiceV2.saveGeostore(JSON.parse(result.geojson), geoData);
-            logger.debug('Return national geojson from carto');
+            existingGeo = await GeoStoreServiceV2.saveGeostore(JSON.parse(result.geojson), geoData);
+            logger.debug('[CartoDBServiceV2 - getNational] Return national geojson from carto');
             return existingGeo;
         }
         return null;
     }
 
-    * getNationalList() {
+    async getNationalList() {
         logger.debug('Request national list names from carto');
-        const countryList = yield GeoStoreServiceV2.getNationalList();
+        const countryList = await GeoStoreServiceV2.getNationalList();
         const isoValuesMap = countryList.map((el) => el.info.iso);
         let isoValues = '';
         isoValuesMap.forEach((el) => {
             isoValues += `'${el.toUpperCase()}', `;
         });
         isoValues = `(${isoValues.substr(0, isoValues.length - 2)})`;
-        const data = yield executeThunk(this.client, ISO_NAME + isoValues);
+        const data = await executeThunk(this.client, ISO_NAME + isoValues);
         if (data.rows && data.rows.length > 0) {
             logger.debug('Adding Country names');
             countryList.forEach((countryListElement) => {
@@ -146,7 +147,7 @@ class CartoDBServiceV2 {
         return countryList;
     }
 
-    * getSubnational(iso, id1, thresh) {
+    async getSubnational(iso, id1, thresh) {
         logger.debug('Obtaining subnational of iso %s and id1', iso, id1);
         const params = {
             id1: `${iso.toUpperCase()}.${parseInt(id1, 10)}_1`
@@ -164,14 +165,14 @@ class CartoDBServiceV2 {
         };
 
         logger.debug('Checking existing subnational geo');
-        let existingGeo = yield GeoStoreServiceV2.getGeostoreByInfoProps(query);
+        let existingGeo = await GeoStoreServiceV2.getGeostoreByInfoProps(query);
         logger.debug('Existed geo', existingGeo);
         if (existingGeo) {
             logger.debug('Return subnational geojson stored');
             return existingGeo;
         }
 
-        const data = yield executeThunk(this.client, ID1, params, thresh);
+        const data = await executeThunk(this.client, ID1, params, thresh);
         logger.debug('Request subnational to carto');
         if (data.rows && data.rows.length > 0) {
             logger.debug('Return subnational geojson from carto');
@@ -186,13 +187,13 @@ class CartoDBServiceV2 {
                     simplifyThresh: thresh
                 }
             };
-            existingGeo = yield GeoStoreServiceV2.saveGeostore(JSON.parse(result.geojson), geoData);
+            existingGeo = await GeoStoreServiceV2.saveGeostore(JSON.parse(result.geojson), geoData);
             return existingGeo;
         }
         return null;
     }
 
-    * getRegional(iso, id1, id2, thresh) {
+    async getRegional(iso, id1, id2, thresh) {
         logger.debug('Obtaining admin2 of iso %s, id1 and id2', iso, id1, id2);
         const params = {
             id2: `${iso.toUpperCase()}.${parseInt(id1, 10)}.${parseInt(id2, 10)}_1`
@@ -210,7 +211,7 @@ class CartoDBServiceV2 {
         };
 
         logger.debug('Checking existing admin2 geostore');
-        let existingGeo = yield GeoStoreServiceV2.getGeostoreByInfoProps(query);
+        let existingGeo = await GeoStoreServiceV2.getGeostoreByInfoProps(query);
         logger.debug('Existed geo', existingGeo);
         if (existingGeo) {
             logger.debug('Return admin2 geojson stored');
@@ -218,7 +219,7 @@ class CartoDBServiceV2 {
         }
 
         logger.debug('Request admin2 shape from Carto');
-        const data = yield executeThunk(this.client, ID2, params, thresh);
+        const data = await executeThunk(this.client, ID2, params, thresh);
         if (data.rows && data.rows.length > 0) {
             logger.debug('Return admin2 geojson from Carto');
             const result = data.rows[0];
@@ -233,13 +234,13 @@ class CartoDBServiceV2 {
                     simplifyThresh: thresh
                 }
             };
-            existingGeo = yield GeoStoreServiceV2.saveGeostore(JSON.parse(result.geojson), geoData);
+            existingGeo = await GeoStoreServiceV2.saveGeostore(JSON.parse(result.geojson), geoData);
             return existingGeo;
         }
         return null;
     }
 
-    * getUse(use, id, thresh) {
+    async getUse(use, id, thresh) {
         logger.debug('Obtaining use with id %s', id);
         const params = {
             use,
@@ -251,7 +252,7 @@ class CartoDBServiceV2 {
         };
 
         logger.debug('Checking existing use geo', info);
-        let existingGeo = yield GeoStoreServiceV2.getGeostoreByInfo(info);
+        let existingGeo = await GeoStoreServiceV2.getGeostoreByInfo(info);
         logger.debug('Existed geo', existingGeo);
         if (existingGeo) {
             logger.debug('Return use geojson stored');
@@ -261,7 +262,7 @@ class CartoDBServiceV2 {
         const USE_SQL = thresh ? SIMPLIFIED_USE : USE;
 
         logger.debug('Request use to carto');
-        const data = yield executeThunk(this.client, USE_SQL, params);
+        const data = await executeThunk(this.client, USE_SQL, params);
 
         if (data.rows && data.rows.length > 0) {
             const result = data.rows[0];
@@ -269,14 +270,14 @@ class CartoDBServiceV2 {
             const geoData = {
                 info
             };
-            existingGeo = yield GeoStoreServiceV2.saveGeostore(JSON.parse(result.geojson), geoData);
+            existingGeo = await GeoStoreServiceV2.saveGeostore(JSON.parse(result.geojson), geoData);
             logger.debug('Return use geojson from carto');
             return existingGeo;
         }
         return null;
     }
 
-    * getWdpa(wdpaid) {
+    async getWdpa(wdpaid) {
         logger.debug('Obtaining wpda of id %s', wdpaid);
 
         const params = {
@@ -284,7 +285,7 @@ class CartoDBServiceV2 {
         };
 
         logger.debug('Checking existing wdpa geo');
-        let existingGeo = yield GeoStoreServiceV2.getGeostoreByInfo(params);
+        let existingGeo = await GeoStoreServiceV2.getGeostoreByInfo(params);
         logger.debug('Existed geo', existingGeo);
         if (existingGeo) {
             logger.debug('Return wdpa geojson stored');
@@ -292,14 +293,14 @@ class CartoDBServiceV2 {
         }
 
         logger.debug('Request wdpa to carto');
-        const data = yield executeThunk(this.client, WDPA, params);
+        const data = await executeThunk(this.client, WDPA, params);
         if (data.rows && data.rows.length > 0) {
             const result = data.rows[0];
             logger.debug('Saving national geostore');
             const geoData = {
                 info: params
             };
-            existingGeo = yield GeoStoreServiceV2.saveGeostore(JSON.parse(result.geojson), geoData);
+            existingGeo = await GeoStoreServiceV2.saveGeostore(JSON.parse(result.geojson), geoData);
             logger.debug('Return wdpa geojson from carto');
             return existingGeo;
         }
