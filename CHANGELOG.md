@@ -1,3 +1,10 @@
+# v1.1.3
+
+## 02/09/2020
+
+- Minor security fixes.
+- Attempt at fixing random errors when creating a geostore.
+
 # v1.1.2
 
 ## 18/05/2020
