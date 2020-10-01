@@ -13,8 +13,6 @@ const sleep = require('sleep');
 
 const mongooseOptions = require('../../config/mongoose');
 
-const mongooseOptions = require('../../config/mongoose');
-
 const mongoUri = process.env.MONGO_URI || `mongodb://${config.get('mongodb.host')}:${config.get('mongodb.port')}/${config.get('mongodb.database')}`;
 
 let retries = 10;
