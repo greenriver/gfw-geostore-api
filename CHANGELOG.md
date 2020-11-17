@@ -1,3 +1,9 @@
+# 1.1.5
+
+## 17/11/2020
+
+- Security update of NPM package `dot-prop` from 4.2.0 to 4.2.1.
+
 # v1.1.4
 
 ## 25/09/2020
