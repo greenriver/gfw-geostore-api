@@ -8,7 +8,7 @@ const koaValidate = require('koa-validate');
 const mongoose = require('mongoose');
 const ErrorSerializer = require('serializers/errorSerializer');
 const koaSimpleHealthCheck = require('koa-simple-healthcheck');
-const ctRegisterMicroservice = require('ct-register-microservice-node');
+const { RWAPIMicroservice } = require('rw-api-microservice-node');
 const sleep = require('sleep');
 
 const mongooseOptions = require('../../config/mongoose');
@@ -97,6 +97,16 @@ async function init() {
             require('validators/geoJSONValidator');
             koaValidate(app);
 
+            app.use(RWAPIMicroservice.bootstrap({
+                name: config.get('service.name'),
+                info: require('../microservice/register.json'),
+                swagger: require('../microservice/public-swagger.json'),
+                logger,
+                baseURL: process.env.CT_URL,
+                url: process.env.LOCAL_URL,
+                token: process.env.CT_TOKEN,
+            }));
+
             // load routes
             loader.loadRoutes(app);
 
@@ -107,25 +117,16 @@ async function init() {
             // In production environment, the port must be declared in environment variable
             const port = process.env.PORT || config.get('service.port');
 
-            const server = app.listen(port, () => {
-                ctRegisterMicroservice.register({
-                    info: require('../microservice/register.json'),
-                    swagger: require('../microservice/public-swagger.json'),
-                    mode: (process.env.CT_REGISTER_MODE && process.env.CT_REGISTER_MODE === 'auto') ? ctRegisterMicroservice.MODE_AUTOREGISTER : ctRegisterMicroservice.MODE_NORMAL,
-                    framework: ctRegisterMicroservice.KOA2,
-                    app,
-                    logger,
-                    name: config.get('service.name'),
-                    ctUrl: process.env.CT_URL,
-                    url: process.env.LOCAL_URL,
-                    active: true,
-                }).then(() => {
-                    logger.info('Server started in ', process.env.PORT);
-                    resolve({ app, server });
-                }, (error) => {
-                    logger.error(error);
-                    process.exit(1);
-                });
+            const server = app.listen(process.env.PORT, () => {
+                if (process.env.CT_REGISTER_MODE === 'auto') {
+                    RWAPIMicroservice.register().then(() => {
+                        logger.info('CT registration process started');
+                        resolve({ app, server });
+                    }, (error) => {
+                        logger.error(error);
+                        process.exit(1);
+                    });
+                }
             });
 
             logger.info(`Server started in port:${port}`);
