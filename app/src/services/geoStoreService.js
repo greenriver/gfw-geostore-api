@@ -122,7 +122,7 @@ class GeoStoreService {
     static async getNationalList() {
         logger.debug('Obtaining national list from database');
         const query = {
-            'info.iso': { $ne: null },
+            'info.iso': { $gt: "" },
             'info.id1': null
         };
         const select = 'hash info.iso';
