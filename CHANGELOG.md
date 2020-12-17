@@ -1,3 +1,10 @@
+# 1.1.6
+
+## 17/12/2020
+
+- Change syntax for national list queries for better performance with DocumentDB
+
+
 # 1.1.5
 
 ## 17/11/2020
