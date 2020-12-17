@@ -125,7 +125,7 @@ class GeoStoreServiceV2 {
     static async getNationalList() {
         logger.debug('[GeoStoreServiceV2 - getGeostoreByInfoProps] Obtaining national list from database');
         const query = {
-            'info.iso': { $ne: null },
+            'info.iso': { $gt: "" },
             'info.id1': null
         };
         const select = 'hash info.iso';
