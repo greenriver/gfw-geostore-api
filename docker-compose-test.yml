@@ -16,6 +16,7 @@ services:
       CT_REGISTER_MODE: auto
       CT_TOKEN: cttoken
       LOCAL_URL: http://geostore.default.svc.cluster.local:3100
+      FASTLY_ENABLED: "false"
     command: test
     depends_on:
       - mongo
