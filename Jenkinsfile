@@ -12,7 +12,6 @@ node {
 
   checkout scm
   properties([pipelineTriggers([[$class: 'GitHubPushTrigger']])])
-  properties([pipelineTriggers([githubPush()])])
 
   try {
 
