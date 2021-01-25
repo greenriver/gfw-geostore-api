@@ -40,7 +40,7 @@ class GeoStoreService {
 
     static async repairGeometry(geojson) {
         try {
-
+            logger.info('[GeoStoreService - repairGeometry] - Starting geometry repair...');
             logger.debug('GeoJSON: %s', JSON.stringify(geojson));
 
             const geometryType = GeoStoreService.getGeometryType(geojson);
@@ -122,7 +122,7 @@ class GeoStoreService {
     static async getNationalList() {
         logger.debug('Obtaining national list from database');
         const query = {
-            'info.iso': { $gt: "" },
+            'info.iso': { $gt: '' },
             'info.id1': null
         };
         const select = 'hash info.iso';

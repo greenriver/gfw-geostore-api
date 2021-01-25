@@ -75,7 +75,7 @@ spec:
                 secretKeyRef:
                   key: CARTODB_USER
                   name: mssecrets
-          image: vizzuality/geostore
+          image: gfwdockerhub/geostore
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 3
