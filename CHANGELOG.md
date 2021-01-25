@@ -1,3 +1,7 @@
+## 25/01/2021
+
+- Increase kubernetes memory limit to support uploading large geometries [https://www.pivotaltracker.com/story/show/176387234](https://www.pivotaltracker.com/story/show/176387234)
+
 # 1.1.6
 
 ## 17/12/2020
