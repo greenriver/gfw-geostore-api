@@ -30,7 +30,7 @@
     "url": "https://github.com/gfw-api/gfw-geostore-api/issues"
   },
   "engines": {
-    "node": "~14"
+    "node": "~12"
   },
   "homepage": "https://github.com/gfw-api/gfw-geostore-api#readme",
   "dependencies": {

@@ -1,4 +1,4 @@
-FROM node:14-alpine
+FROM node:12-alpine
 MAINTAINER info@vizzuality.com
 
 ENV NAME gfw-geostore-api
