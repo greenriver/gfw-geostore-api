@@ -36,6 +36,8 @@ spec:
           env:
             - name: PORT
               value: "3100"
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=1024"
             - name: NODE_ENV
               value: prod
             - name: NODE_PATH
@@ -91,7 +93,7 @@ spec:
                   key: FASTLY_SERVICEID
                   name: mssecrets
                   optional: true
-          image: vizzuality/geostore
+          image: gfwdockerhub/geostore
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 3
@@ -133,4 +135,3 @@ spec:
       schedulerName: default-scheduler
       securityContext: { }
       terminationGracePeriodSeconds: 30
-status: { }
