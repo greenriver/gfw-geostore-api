@@ -46,10 +46,11 @@ const GeoStore = new Schema({
         },
         simplify: { type: Boolean, required: false },
         simplifyThresh: { type: Number, required: false }
-
     }
 });
 
+GeoStore.index({ hash: 1 });
+GeoStore.index({ info: 1 }, { unique: false });
 GeoStore.index({
     hash: 1,
     'info.iso': 1,

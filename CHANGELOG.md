@@ -1,3 +1,7 @@
+## 19/03/2021
+
+- Add MongoDB index to speed up queries by geostore info.
+
 ## 25/01/2021
 
 - Increase kubernetes memory limit to support uploading large geometries [https://www.pivotaltracker.com/story/show/176387234](https://www.pivotaltracker.com/story/show/176387234)
