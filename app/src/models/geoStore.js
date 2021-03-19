@@ -50,7 +50,7 @@ const GeoStore = new Schema({
 });
 
 GeoStore.index({ hash: 1 });
-GeoStore.index({ info: 1 }, { sparse: true, unique: false });
+GeoStore.index({ info: 1 }, { unique: false });
 GeoStore.index({
     hash: 1,
     'info.iso': 1,
